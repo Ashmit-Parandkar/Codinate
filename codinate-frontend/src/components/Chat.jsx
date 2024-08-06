@@ -147,8 +147,9 @@ const Chat = (props) => {
   };
 
   return (
-    <div className="w-[500px] h-[500px] m-1">
-      <div className="w-[500px] h-[500px] bg-[#323237] border-2 rounded-lg pt-7">
+    <div className="w-[500px] h-[500px] m-1 flex flex-col mb-4 overflow-x-hidden">
+<div>
+      <div className="w-[90vw] lg:w-[30vw] bg-[#323237] border-2 rounded-lg pt-7 h-[400px] lg:h-[68vh] overflow-y-scroll">
         {messages.map((message, index) => (
           <MessageContainer
             key={index}
@@ -159,20 +160,24 @@ const Chat = (props) => {
           />
         ))}
       </div>
+      </div>
       <div className="flex gap-4 mt-4">
-        <FiPaperclip className="text-2xl bg-white rounded-full p-2 w-10 h-10" />
+        <FiPaperclip className="text-2xl bg-white rounded-full p-2 w-8 h-8 lg:w-10 lg:h-10" />
         <input
           type="text"
           placeholder="Message"
           id="chat-input"
-          className="p-2 rounded-lg outline-none focus:outline-none w-80"
+          className="p-2 rounded-lg outline-none focus:outline-none w-50 lg:w-[18vw]"
         />
         <FiSend
-          className="text-2xl bg-white rounded-full p-2 w-10 h-10"
+          className="text-2xl bg-white rounded-full p-2 w-8 h-8 lg:w-10 lg:h-10"
           onClick={handleButtonClick}
         />
-        <FaMicrophone className="text-2xl bg-white rounded-full p-2 w-10 h-10" />
+        <FaMicrophone className="text-2xl bg-white rounded-full p-2 w-8 h-8 lg:w-10 lg:h-10" />
       </div>
+
+
+
     </div>
   );
 };

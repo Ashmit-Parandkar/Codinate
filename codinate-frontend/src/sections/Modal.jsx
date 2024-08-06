@@ -11,8 +11,8 @@ const Modal = ({id,isVisible,setshowModal,children}) => {
     <section id={id}>
       <div className='flex justify-center items-center fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm' id="wrapper" onClick={handleClose}>
     <div className='w-[600px] flex flex-col'>
-    <button className='text-white text-xl place-self-end' onClick={()=>setshowModal(false)}>X</button>
-    <div className='bg-[#404040] p-2 rounded'>{children}</div>
+    <button className='text-white text-xl place-self-end' onClick={()=>setshowModal(false)}><strong>X</strong></button>
+    <div className='bg-[#404040] p-2 rounded sm:w-[94vw] lg:w-[46vw]'>{children}</div>
 
     </div>
       

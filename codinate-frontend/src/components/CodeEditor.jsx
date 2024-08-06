@@ -1,4 +1,11 @@
-import React, { useState, useEffect } from "react";
+/////////////////////////////////////////
+///////////////////////////////////////
+//////////////////////////////////
+/////////////////////////////////////
+///////////////////////////////
+
+
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import AceEditor from "react-ace";
 import { io } from "socket.io-client"; // Importing socket.io-client
@@ -26,6 +33,11 @@ const CodeEditor = () => {
   const [theme, setTheme] = useState("monokai");
   const [fontSize, setFontSize] = useState(18);
   const [socket, setSocket] = useState(null); // State for socket
+  const [previousLine, setPreviousLine] = useState(undefined);
+  const [lockedLines, setLockedLines] = useState({});
+  const [displayWarning, setDisplayWarning] = useState(false);
+  const [conflictLine, setConflictLine] = useState(1);
+  const editorRef = useRef(null);
 
   useEffect(() => {
     const newSocket = io("http://localhost:8080"); // Establishing socket connection
@@ -44,11 +56,29 @@ const CodeEditor = () => {
     socket.on("connect", () => {
       console.log("Socket.io client connected");
     });
+
     socket.emit("addProjectRoom",roomData.roomId)
+
     socket.on("currentCode", (newCode) => {
       console.log("Hello", newCode);
       console.log("Received current code from server:", newCode);
       setCode(newCode);
+    });
+
+    socket.on("lineLocked", ({ line, userId }) => {
+      setLockedLines((prev) => ({ ...prev, [line]: userId }));
+      console.log("Locking.........");
+      console.log(lockedLines);
+    });
+
+    socket.on("lineUnlocked", ({ line }) => {
+      setLockedLines((prev) => {
+        const newLockedLines = { ...prev };
+        delete newLockedLines[line];
+        console.log("Unlocking.........");
+        console.log(lockedLines);
+        return newLockedLines;
+      });
     });
 
     if (socket) { 
@@ -156,10 +186,51 @@ const CodeEditor = () => {
       });
   };
 
+
+  const lockLine = (lineNumber) => {
+    if (socket) {
+      socket.emit("lockLine", { roomId: roomData.roomId, line: lineNumber });
+    }
+  };
+
+  const unlockLine = (lineNumber) => {
+    if (socket) {
+      socket.emit("unlockLine", { roomId: roomData.roomId, line: lineNumber });
+    }
+  };
+
+  const handleCursorChange = (selection) => {
+    if (editorRef.current) {
+      const editor = editorRef.current.editor;
+      const line = editor.getCursorPosition().row;
+
+      if (lockedLines[line] && lockedLines[line] !== socket.id) {
+        console.log(`Line ${line + 1} is being edited by another user. ${roomData.senderName}`);
+        setConflictLine(line+1)
+        setDisplayWarning(true)
+
+        setTimeout(() => {
+          setDisplayWarning(false)
+        }, 3000);
+
+      }
+
+      if (previousLine !== undefined && previousLine !== line) {
+        unlockLine(previousLine);
+        console.log(`Unlocked Line : ${previousLine+1}`)
+      }
+
+      lockLine(line);
+      console.log(`Locking Line : ${line+1}`)
+      setPreviousLine(line);
+    }
+  };
+
   return (
-    <div>
-      <div className="flex gap-5 py-7">
-        <div>
+    <div className="overflow-x-hidden lg:overflow-y-hidden">
+      <div className="flex gap-5 py-7 flex-col-reverse lg:flex-row">
+        <div className="flex flex-col lg:flex-row sm:justify-around sm:align-center sm:ml-8">
+        <div className="w-[30vw] lg:w-[10vw]">
           <label htmlFor="language-select" className="text-white text-lg pl-5">Language:</label>
           <select
             id="language-select"
@@ -173,7 +244,7 @@ const CodeEditor = () => {
             <option value="c_cpp">C++</option>
           </select>
         </div>
-        <div>
+        <div className="w-[40vw] mx-2 lg:w-[13vw]">
           <label htmlFor="theme-select" className="text-white text-lg ml-1">Theme:</label>
           <select
             id="theme-select"
@@ -190,7 +261,7 @@ const CodeEditor = () => {
             <option value="dracula">Dracula</option>
           </select>
         </div>
-        <div>
+        <div className="w-[30vw] mx-1 flex flex-col lg:w-[10vw]">
           <label className="text-white text-lg ml-1">Font Size:</label>
           <input
             type="number"
@@ -200,23 +271,38 @@ const CodeEditor = () => {
             onChange={(e) => setFontSize(parseInt(e.target.value))}
           />
         </div>
-
-        <button onClick={runCode} className="bg-cyan-300 px-4 text-center rounded  hover:bg-cyan-500 text-gray-700 font-semibold" style={{marginLeft:"11vw"}}>Run Code</button>
-        <button onClick={copyRoomInfo} className="bg-cyan-300 px-4 text-center rounded  hover:bg-cyan-500 text-gray-700 font-semibold" style={{marginLeft:"13.5vw"}}>Copy Room Info</button>
+        </div>
+        <button onClick={runCode} className="bg-cyan-300 px-4 text-center rounded  hover:bg-cyan-500 text-gray-700 font-semibold ml-4 mr-4 py-4 lg:ml-[14vw]">Run Code</button>
+        <button onClick={copyRoomInfo} className="bg-cyan-300 px-4 text-center rounded  hover:bg-cyan-500 text-gray-700 font-semibold ml-4 mr-4 py-4 lg:ml-[13.5vw]">Copy Room Info</button>
       </div>
 
-      <div className="flex gap-7 mx-4" style={{marginTop:"10px"}}>
+      {displayWarning && <div className="bg-red-200 px-6 py-4 mx-2 my-4 rounded-md text-lg flex items-center mx-auto max-w-lg absolute top-[2vh] right-[2vw]">
+        <svg viewBox="0 0 24 24" className="text-red-600 w-5 h-5 sm:w-5 sm:h-5 mr-3">
+            <path fill="currentColor"
+                d="M11.983,0a12.206,12.206,0,0,0-8.51,3.653A11.8,11.8,0,0,0,0,12.207,11.779,11.779,0,0,0,11.8,24h.214A12.111,12.111,0,0,0,24,11.791h0A11.766,11.766,0,0,0,11.983,0ZM10.5,16.542a1.476,1.476,0,0,1,1.449-1.53h.027a1.527,1.527,0,0,1,1.523,1.47,1.475,1.475,0,0,1-1.449,1.53h-.027A1.529,1.529,0,0,1,10.5,16.542ZM11,12.5v-6a1,1,0,0,1,2,0v6a1,1,0,1,1-2,0Z">
+            </path>
+        </svg>
+        <span className="text-red-800"> Line {conflictLine} is being edited by other user.</span>
+    </div>}
+        
+
+      <div className="flex gap-7 mx-4 flex-col lg:flex-row lg:h-[80vh] w-60vw ace-container" style={{marginTop:"10px"}}>
+        <div className="w-[92vw] lg:w-[60vw] lg:h-[76vh] overflow-y-hidden">
         <AceEditor
+          className=""
+          // style={{width:"60vw"}}
+          ref={editorRef}
           mode={language}
           theme={theme}
           fontSize={fontSize}
           value={code}
           onChange={handleCodeChange}
-          width="60%"
-          height="82vh"
+          width="100%"
+          height="80vh"
           showPrintMargin={true}
           showGutter={true}
           highlightActiveLine={true}
+          editorProps={{ $blockScrolling: true }}
           setOptions={{
             enableBasicAutocompletion: true,
             enableLiveAutocompletion: true,
@@ -224,13 +310,17 @@ const CodeEditor = () => {
             showLineNumbers: true,
             tabSize: 2,
           }}
+          // onFocus={handleFocus}
+          // onBlur={handleBlur}
+          onCursorChange={handleCursorChange}
         />
+        </div>
 
-        <div className="flex flex-col w-96 gap-7" style={{margin:"-22px 0"}}>
+        <div className="flex flex-row lg:flex-col w-96 lg:w-[12vw] gap-7" style={{margin:"-22px 0"}}>
           <div>
             <label htmlFor="input-textarea" className="text-white text-lg">Input:</label>
 <br />
-            <textarea name="input" id="input" cols="30" rows="10" value={input} className="bg-gray-300 rounded-lg p-4" onChange={(e)=>{setInput(e.target.value)}}></textarea>
+            <textarea name="input" id="input" cols="30" rows="8" value={input} className="bg-gray-300 rounded-lg p-4 w-[42vw] h-[32vh] lg:w-[12vw]" onChange={(e)=>{setInput(e.target.value)}}></textarea>
 
             {/* <AceEditor
               mode={language}
@@ -255,7 +345,7 @@ const CodeEditor = () => {
           <div>
             <label htmlFor="output-textarea" className="text-white text-lg">Output:</label>
 <br />
-            <textarea name="output" id="output" cols="30" className="bg-gray-300 rounded-lg p-4" rows="10" value={output}></textarea>
+            <textarea name="output" id="output" cols="30" className="bg-gray-300 rounded-lg p-4 w-[42vw] h-[32vh] lg:w-[12vw]" rows="12" value={output}></textarea>
 
 
             {/* <AceEditor

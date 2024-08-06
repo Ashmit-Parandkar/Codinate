@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-require("dotenv").config({ path: "../.env" });
+const dotenv = require("dotenv");
 const {createServer} = require('http');
 const { Server } = require('socket.io');
 const Room = require('./models/room')
@@ -20,8 +20,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.json());
+dotenv.config();
 
 let currentCode = "";
+
 
 // Initialize server with express app
 // const server = require('http').createServer(app);
@@ -93,6 +95,14 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on("lockLine", ({ roomId, line }) => {
+    socket.broadcast.to(`${roomId}project`).emit("lineLocked", { line, userId: socket.id });
+  });
+
+  socket.on("unlockLine", ({ roomId, line }) => {
+    socket.broadcast.to(`${roomId}project`).emit("lineUnlocked", { line });
+  });
+
   socket.on("chatMessage", ({ chatText, roomId, senderName, formattedTime }) => {
     
     socket.broadcast.to(roomId + "chat").emit("sendChatMessage", { chatText, roomId, senderName, formattedTime });
@@ -137,6 +147,10 @@ const sendResponse = (res, statusCode, body) => {
       ...body
   })
 }
+
+app.get("/", (req, res)=>{
+  res.send("Collaborative Code Editor !")
+})
 
 app.post("/", async (req, res) => {
   console.log("Req  : ", req.body)
