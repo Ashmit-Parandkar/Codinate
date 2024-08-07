@@ -109,7 +109,7 @@ import { io } from "socket.io-client";
 
 const Chat = (props) => {
   const [messages, setMessages] = useState([]);
-  const socketChat = useMemo(() => io("http://localhost:8080"), []);
+  const socketChat = useMemo(() => io("https://codinate-backend.vercel.app/"), []);
 
   useEffect(() => {
     if (!props.roomData) return;
