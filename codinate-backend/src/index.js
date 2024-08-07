@@ -7,9 +7,9 @@ const {createServer} = require('http');
 const { Server } = require('socket.io');
 const Room = require('./models/room')
 
-const {runCode} = require("./run-code");
-const {supportedLanguages} = require("./run-code/instructions");
-const {info} = require("./run-code/info");
+// const {runCode} = require("./run-code");
+// const {supportedLanguages} = require("./run-code/instructions");
+// const {info} = require("./run-code/info");
 const bodyParser = require("body-parser");
 
 const app = express();
@@ -152,28 +152,28 @@ app.get("/", (req, res)=>{
   res.send("Collaborative Code Editor !")
 })
 
-app.post("/", async (req, res) => {
-  console.log("Req  : ", req.body)
-  try {
-      const output = await runCode(req.body)
-      sendResponse(res, 200, output)
-  } catch (err) {
-      sendResponse(res, err?.status || 500, err)
-  }
-})
+// app.post("/", async (req, res) => {
+//   console.log("Req  : ", req.body)
+//   try {
+//       const output = await runCode(req.body)
+//       sendResponse(res, 200, output)
+//   } catch (err) {
+//       sendResponse(res, err?.status || 500, err)
+//   }
+// })
 
-app.get('/list', async (req, res) => {
-  const body = []
+// app.get('/list', async (req, res) => {
+//   const body = []
 
-  for(const language of supportedLanguages) {
-      body.push({
-          language,
-          info: await info(language),
-      })
-  }
+//   for(const language of supportedLanguages) {
+//       body.push({
+//           language,
+//           info: await info(language),
+//       })
+//   }
 
-  sendResponse(res, 200, {supportedLanguages: body})
-})
+//   sendResponse(res, 200, {supportedLanguages: body})
+// })
 
 server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
