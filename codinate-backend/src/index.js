@@ -31,7 +31,7 @@ const server = new createServer(app);
 // const io = require('socket.io')(server);
 const io = new Server(server,{
   cors:{
-     origin:"http://localhost:5173", 
+     origin:"https://codinate-app.vercel.app/", 
      method: ["GET","POST"],
      credentials:true,
   },
