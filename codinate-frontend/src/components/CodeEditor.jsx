@@ -40,7 +40,7 @@ const CodeEditor = () => {
   const editorRef = useRef(null);
 
   useEffect(() => {
-    const newSocket = io("http://localhost:8080"); // Establishing socket connection
+    const newSocket = io("https://codinate-backend.vercel.app/"); // Establishing socket connection
     setSocket(newSocket);
 
     return () => {
@@ -140,7 +140,7 @@ const CodeEditor = () => {
     console.log(currLang)
 
 
-    fetch("http://localhost:8080/", {
+    fetch("https://codinate-backend.vercel.app/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
