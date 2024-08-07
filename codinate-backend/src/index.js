@@ -14,9 +14,12 @@ const bodyParser = require("body-parser");
 
 const app = express();
 
+const allowedOrigin = 'https://codinate-app.vercel.app';
+
 app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
+    origin: allowedOrigin,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
 }));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
@@ -33,10 +36,11 @@ let currentCode = "";
 const server = new createServer(app);
 // const io = require('socket.io')(server);
 const io = new Server(server,{
-  cors:{
-     origin:"*", 
-     method: ["GET","POST"],
-  },
+    cors: {
+        origin: allowedOrigin,
+        methods: ["GET", "POST"],
+        credentials: true
+    }
  });
 
 const getInitialCode = async(roomId) =>{
