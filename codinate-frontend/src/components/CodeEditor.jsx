@@ -40,7 +40,7 @@ const CodeEditor = () => {
   const editorRef = useRef(null);
 
   useEffect(() => {
-    const newSocket = io("https://codinate-backend.vercel.app", {
+    const newSocket = io("https://codinate.onrender.com", {
       transports: ['websocket', 'polling'],
       withCredentials: true
     });
