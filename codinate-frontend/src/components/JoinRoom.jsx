@@ -20,7 +20,7 @@ const JoinRoom = (props) => {
 
     console.log(formData);
 
-    fetch("https://codinate-backend.vercel.app/api/joinRoom", {
+    fetch("https://codinate.onrender.com/api/joinRoom", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
