@@ -14,7 +14,7 @@ const bodyParser = require("body-parser");
 
 const app = express();
 
-const allowedOrigin = 'https://codinate-app.vercel.app';
+const allowedOrigin = 'https://codinate-ps5r.onrender.com';
 
 app.use(cors({
     origin: allowedOrigin,
