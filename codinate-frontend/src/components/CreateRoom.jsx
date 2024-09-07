@@ -25,7 +25,7 @@ const CreateRoom = (props) => {
     //   })
     // }
 
-    fetch("https://codinate-backend.vercel.app/api/room", {
+    fetch("https://codinate.onrender.com/api/room", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
