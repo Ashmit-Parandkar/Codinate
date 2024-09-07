@@ -143,7 +143,7 @@ const CodeEditor = () => {
     console.log(currLang)
 
 
-    fetch("https://codinate-backend.vercel.app", {
+    fetch("https://codinate.onrender.com", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
